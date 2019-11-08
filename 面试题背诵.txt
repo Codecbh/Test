@@ -1,0 +1,209 @@
+
+1、springMVC执行流程
+        01、用户发送出请求到前端控制器DispatcherServlet。
+		02、DispatcherServlet收到请求调用HandlerMapping（处理器映射器）。
+		03、HandlerMapping找到具体的处理器(可查找xml配置或注解配置)，生成处理器对象及处理器拦截器(如果有)，再一起返回给DispatcherServlet。
+		04、DispatcherServlet调用HandlerAdapter（处理器适配器）。
+		05、HandlerAdapter经过适配调用具体的处理器（Handler/Controller）。
+		06、Controller执行完成返回ModelAndView对象。
+		07、HandlerAdapter将Controller执行结果ModelAndView返回给DispatcherServlet。
+		08、DispatcherServlet将ModelAndView传给ViewReslover（视图解析器）
+		09、ViewReslover解析后返回具体View（视图）。
+		10、DispatcherServlet根据View进行渲染视图（即将模型数据填充至视图中）。
+		11、DispatcherServlet响应用户。
+
+2、线程池原理
+       如果并发的线程数量很多，并且每个线程都是执行一个时间很短的任务就结束了，
+	   线程池可减少创建和销毁线程的次数，每个工作线程都可以被重复利用，可执行多个任务		 
+3、常见线程池(线程池实现参考:https://www.jianshu.com/p/cc66c5201032)
+       ①newSingleThreadExecutor：单个线程的线程池，即线程池中每次只有一个线程工作，单线程串行执行任务
+       ②newFixedThreadExecutor(n)：固定数量的线程池，没提交一个任务就是一个线程，直到达到线程池的最大数量，然后后面进入等待队列直到前面的任务完成才继续执行
+       ③newCacheThreadExecutor（推荐使用）：可缓存线程池，当线程池大小超过了处理任务所需的线程，那么就会回收部分空闲（一般是60秒无执行）的线程，当有任务来时，又智能的添加新线程来执行。
+	   ④newScheduleThreadExecutor：大小无限制的线程池，支持定时和周期性的执行线程
+					 
+4、jdk1.8新特性
+       1、接口中可以写方法体，使用default关键字
+	       public interface NewCharacter {
+				public void test1();
+				public default void test2(){
+					System.out.println("我是新特性1");
+				}
+			}
+		2、Lambda 表达式
+		     interface MathOperation{ int operate（int a,int b）  }
+			 调用：
+			    MathOperation plus=(a,b)->a+b
+				sout(plus.operate(1,2))
+		3、函数式接口：“函数式接口”是指仅仅只包含一个抽象方法的接口
+		        @FunctionalInterface
+				public interface MyLamda {
+					 public void test1(String y);
+				    //这里如果继续加一个抽象方法便会报错
+				    //public void test1();
+			     }
+			看一下这个接口的调用，符合lambda表达式的调用方法
+			MyLamda m = y -> System.out.println("ss"+y);
+5、post ,get 请求的区别？
+     get:url参数可见，不安全，长度受限，url可传播
+     post:url参数不可见，安全，长度不受限，url不可传播
+6、springboot具体包含哪些注解，最好说说每个注解含义？
+     (1) springboot主配置类上是@SpringBootApplication 注解，这是一个组合注解，
+	     查看源码包含以下三个注解：@SpringBootConfiguration，@EnableAutoConfiguration，@ComponentScan
+		 @SpringBootConfiguration:标注当前类是配置类，这个注解继承自@Configuration。并会将当前类内声明的一个或多个以@Bean注解标记的方法的实例纳入到srping容器中，并且实例名就是方法名。
+         @EnableAutoConfiguration:是自动配置的注解，这个注解会根据我们添加的组件jar来完成一些默认配置，我们做微服时会添加spring-boot-starter-web这个组件jar的pom依赖，这样配置会默认配置springmvc 和tomcat。
+         @ComponentScan:扫描当前包及其子包下被@Component，@Controller，@Service，@Repository注解标记的类并纳入到spring容器中进行管理。等价于<context:component-scan>的xml配置文件中的配置项。
+     (2) @MapperScan:spring-boot支持mybatis组件的一个注解，通过此注解指定mybatis接口类的路径，即可完成对mybatis接口的扫描	  
+	 (3) @ImportResource:@ImportResource(locations={}) 导入其他xml配置文件，需要标准在主配置类上。
+7、spring有哪些注入方式?
+        set注入
+        构造器注入
+        p命名空间注入
+        集合注入     
+8、Spring的aop与ioc,AOP的使用场景？
+    IOC:依赖注入或者叫做控制反转，把创建对象的权利交给spring
+    AOP:面向切面编程，将公共功能抽离出来集中解决，不打破原有的规则；
+	
+	AOP使用场景:事务管理、日志管理、权限管理、性能优化等
+  
+9、设计模式有哪些?
+       单例模式:单例模式对实例个数的控制并节约系统资源.在它的核心结构中只包含一个被称为单例类的特殊类,通过构造函数私有化和静态块以及提供对外访问的接口来实现.
+                应用场景：如果希望在系统中某个类的对象只能存在一个,单例模式是最好的解决方案。
+       工厂模式:工厂模式主要是为创建对象提供了接口
+                应用场景如下：在编码时不能预见需要创建哪种类的实例;系统不应依赖于产品类实例如何被创建、组合和表达的细节。
+       观察者模式:定义了对象间一对多的依赖关系，当一个对象改变状态时，它的所有依赖者都会收到通知并自动更新
+                  应用场景如下：对一个对象状态的更新，需要其他对象同步更新，而且其他对象的数量动态可变；对象仅需要将自己的更新通知给其他对象而不需要知道其他对象的细节；
+				  (实现参考https://www.jianshu.com/p/12a009f8d016)
+10、Sql性能优化方式?
+       1.保证不查询多余的列与行。
+	   2.慎用distinct关键字
+	   3.慎用union关键字,满足union的语句必须满足：1.列数相同。 2.对应列数的数据类型要保持兼容
+	   4.判断表中是否存在数据使用select count(1) id from product
+	   5.连接查询的优化，根据左右连接关联查询特点确定使用哪种查询方式
+	       select * from ((select * from orde where OrderId>10000) o  left join orderproduct op on o.orderNum=op.orderNum )
+           select * from (orde o left join orderproduct op on o.orderNum=op.orderNum ) where o.OrderId>10000
+	   6.查询条件中，一定不要使用select *
+	   7.在表中建立索引，优先考虑where.group by使用到的字段
+	   8.对于连续的数值，能用 between 就不要用 in 
+	   9.尽量不要在 where 子句中对字段进行表达式操作
+       
+11、solr和es的区别
+       solr（与zeekper配合才能分布式,建索引慢，检索快),电商数据稳定，不需要快速更新索引，查询多；
+       Es(更适合分布式，建索引块，查询稍微慢)，社交网站，构建索引块，发帖后别人可以最快时间搜索到  
+
+12.支付宝的支付流程，没有收到异步通知怎么处理的？
+       1、prepay(显示订单信息)   
+	   2、调用支付平台统一下单接口，支付平台返回给商户二维码
+       3、用户扫描二维码支付给支付平台
+       4、支付平台返回验签成功或失败给商户系统	   
+	   5、商户系统进行notify(处理业务逻辑)和return(返回用户结果)
+	   如果没有收到异步通知进行以下排查：
+	         1.异步地址无法公网访问 
+             2.异步地址代码传值错误 
+             3.其实已经收到（其实是验签失败返回为空），但是没有做日志记录或者没有记录到通知。
+13.如何保证线程安全，线程锁有哪些?
+      同步方法和同步代码块
+      常见的锁：ReentrantLock与synchronized
+	  二者区别:          
+            (1) 线程A和B都要获取对象O的锁定，假设A获取了对象O锁，B将等待A释放对O的锁定，
+                  如果使用 synchronized ，如果A不释放，B将一直等下去，不能被中断；
+                  如果使用ReentrantLock，如果A不释放，可以使B在等待了足够长的时间以后，中断等待，而干别的事情；  
+			(2) synchronized是在JVM层面上实现的，不但可以通过一些监控工具监控synchronized的锁定，而且在代码执行时出现异常，
+			    JVM会自动释放锁定，但是使用Lock则不行，lock是通过代码实现的，要保证锁定一定会被释放，就必须将unLock()放到finally{}中
+            (3)在资源竞争不是很激烈的情况下，Synchronized的性能要优于ReetrantLock，
+			   但是在资源竞争很激烈的情况下，Synchronized的性能会下降几十倍，但是ReetrantLock的性能能维持常态；
+14.有一张表，如何找到指定字段重复的记录	
+      select * from people where peopleId in (select peopleId from people group by peopleId having count(peopleId) > 1)		
+15.前后端交互的形式，单点登录怎么实现的？
+	     前后端交互方式:ajax
+		 什么是单点登录？
+		     单点登录（Single Sign On），简称为 SSO，
+			 是目前比较流行的企业业务整合的解决方案之一。SSO的定义是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。
+		单点登录实现:
+		     登录成功后保存token到redis并返回给前端，前端会附加在下次请求的http头(header)中以供服务器验证
+			 访问每个请求时，先从header中获取token，再根据token获取User信息，如果User不为null，则证明token没有失效，可继续访问
+			 当token即将过期时，进行token置换，在新token存入redis之前，为老token续命；
+16.outMemeryError是什么异常，产生异常的原因	
+       内存不足、内存溢出错误
+       原因:
+	       检查代码中是否有死循环或递归调用。
+           检查是否有大循环重复产生新对象实体。
+           检查对数据库查询中，是否有一次获得全部数据的查询。一般来说，如果一次取十万条记录到内存，就可能引起内存溢出。这个问题比较隐蔽，在上线前，数据库中数据较少，不容易出问题，上线后，数据库中数据多了，一次查询就有可能引起内存溢出。因此对于数据库查询尽量采用分页的方式查询。
+           检查List、MAP等集合对象是否有使用完后，未清除的问题。List、MAP等集合对象会始终存有对对象的引用，使得这些对象不能被GC回收。
+           启动参数内存值设定的过小,对tomcat容器，可以在启动时对jvm设置内存限度。对tomcat，可以在catalina.bat中添加：
+		      set CATALINA_OPTS=-Xms128M -Xmx256M
+              set JAVA_OPTS=-Xms128M -Xmx256M
+17.分布式事务？
+     就是一次大的操作由不同的小操作组成，这些小的操作分布在不同的服务器上，
+	 且属于不同的应用，分布式事务需要保证这些小操作要么全部成功，
+	 要么全部失败。本质上来说，分布式事务就是为了保证不同数据库的数据一致性。
+     分布式事务的应用场景:
+	     支付
+             最经典的场景就是支付了，一笔支付，是对买家账户进行扣款，同时对卖家账户进行加钱，这些操作必须在一个事务里执行，
+			 要么全部成功，要么全部失败。而对于买家账户属于买家中心，对应的是买家数据库，
+			 而卖家账户属于卖家中心，对应的是卖家数据库，对不同数据库的操作必然需要引入分布式事务。
+
+         在线下单
+             买家在电商平台下单，往往会涉及到两个动作，一个是扣库存，第二个是更新订单状态，
+			 库存和订单一般属于不同的数据库，需要使用分布式事务保证数据一致性。
+	 分布式事务解决方案:
+	     此方案的核心是将需要分布式处理的任务通过消息日志的方式来异步执行。
+		 消息日志可以存储到本地文本、数据库或消息队列，再通过业务规则自动或人工发起重试。
+		 人工重试更多的是应用于支付场景，通过对账系统对事后问题的处理。
+			 比如 A 同步调用 B，C。A 本地事务成功的时候更新本地事务记录状态，B 和 C 同样。
+			 如果有一次 A 调用 B 失败了，这个失败可能是 B 真的失败了，也可能是调用超时，实际 B 成功。
+			 则由一个中心服务对比三方的事务记录表，做一个最终决定。
+			 假设现在三方的事务记录是 A 成功，B 失败，C 成功。那么最终决定有两种方式，根据具体场景：
+					  重试 B，直到 B 成功，事务记录表里记录了各项调用参数等信息；
+					  执行 A 和 B 的补偿操作(一种可行的补偿方式是回滚)。
+			 对 b 场景做一个特殊说明：比如 B 是扣库存服务，在第一次调用的时候因为某种原因失败了，但是重试的时候库存已经变为 0，无法重试成功，这个时候只有回滚 A 和 C 了。
+18、什么是跨域？怎么解决跨域问题？  https://www.cnblogs.com/zhaosq/p/10511633.html
+    跨域，指的是浏览器不能执行其他网站的脚本。
+	它是由浏览器的同源策略造成的，
+	是浏览器对JavaScript施加的安全限制。
+	所谓同源是指，域名，协议，端口均相同，不明白没关系，举个栗子：
+    http://www.123.com/index.html 调用 http://www.123.com/server.PHP （非跨域）
+    http://www.123.com/index.html 调用 http://www.456.com/server.php （主域名不同:123/456，跨域）
+    http://abc.123.com/index.html 调用 http://def.123.com/server.php （子域名不同:abc/def，跨域）
+    http://www.123.com:8080/index.html 调用 http://www.123.com:8081/server.php （端口不同:8080/8081，跨域）
+    http://www.123.com/index.html 调用 https://www.123.com/server.php （协议不同:http/https，跨域）
+    请注意：localhost和127.0.0.1虽然都指向本机，但也属于跨域。
+	解决跨域(由前端人员来解决):
+	     比如：jsonp跨域
+					JSONP（JSON with Padding：填充式JSON)，应用JSON的一种新方法，
+					JSON、JSONP的区别：
+		　             1、JSON返回的是一串数据、JSONP返回的是脚本代码(包含一个函数调用)
+		　             2、JSONP 只支持get请求、不支持post请求
+		　             (类似往页面添加一个script标签，通过src属性去触发对指定地址的请求,故只能是Get请求)
+					jquery实现:
+						<script type="text/javascript">
+
+								$.ajax({ 
+
+									 type: "get",
+
+									 async: false, 
+
+									 url: "http://localhost:8546/Service.ashx", 
+
+									 dataType: "jsonp", 
+
+									success: function (data) { 
+
+									   alert(data);
+
+									  }, 
+
+									error: function () { 
+
+									   alert('fail');
+
+									 } 
+
+							   }); 
+
+						 </script>
+19、Spring Bean的生命周期
+        实例化 Instantiation
+		属性赋值 Populate
+		初始化 Initialization
+		销毁 Destruction

@@ -1,5 +1,5 @@
 
-1、springMVC执行流程  。。更改！！！
+1、springMVC执行流程  。。更改！！！123
         01、用户发送出请求到前端控制器DispatcherServlet。
 		02、DispatcherServlet收到请求调用HandlerMapping（处理器映射器）。
 		03、HandlerMapping找到具体的处理器(可查找xml配置或注解配置)，生成处理器对象及处理器拦截器(如果有)，再一起返回给DispatcherServlet。
